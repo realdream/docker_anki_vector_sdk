@@ -1,7 +1,10 @@
 FROM ubuntu:16.04
 ENV DEBIAN_FRONTEND noninteractive
-RUN apt-get clean \
-    && apt-get -qq update --fix-missing \
+COPY sources.list /etc/apt/
+RUN rm -rf /etc/apt/apt.conf.d/docker-clean \
+    && apt-get clean \
+    && apt-get update --fix-missing \
+    && apt-get -qq install apt-transport-https ca-certificates curl gnupg-agent software-properties-common \
     && apt-get -qq install wget bash-completion vim \
     # && apt-get -qq install -y localepurge \
     # && locale-gen en_US en_US.UTF-8 \
@@ -24,11 +27,10 @@ RUN apt-get -qq install sudo \
 USER user
 WORKDIR /home/user
 ENV HOME /home/user
+
 COPY .pip /home/user/.pip
 COPY .pydistutils.cfg /home/user/
-# RUN python3.6 -m pip install --user protobuf gcloud google-api-python-client 
-RUN sudo -H python3.6 -m pip install --user anki_vector 
-RUN sudo -H python3.6 -m pip install --user pyopengl ipython
 
-
-
+RUN python3.6 -m pip install --user anki_vector \
+    && python3.6 -m pip install --user pyopengl ipython
+RUN echo "alias py='python3.6'" >> ~/.bashrc
